@@ -34,8 +34,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "homepage": "https://www.lightacandleforclaude.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vidrepar/isclaudedumbornot.com"
+    "url": "https://github.com/theBliz/CandleLineInterface"
   }
 }

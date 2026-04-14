@@ -72,5 +72,13 @@ The first time you send a prayer, macOS will ask for **Accessibility access** (s
 
 ---
 
+---
+
+## The Shrine
+
+Visit the full candle vigil at **[lightacandleforclaude.com](https://www.lightacandleforclaude.com/)** — light a candle, leave a prayer, and join the community memorial for every developer who has suffered.
+
+---
+
 *Not affiliated with Anthropic, Claude, or any actual organized religion.*  
 *No tokens were harmed in the making of this shrine.*
