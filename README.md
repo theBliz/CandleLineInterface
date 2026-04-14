@@ -21,22 +21,12 @@ A `🕯️` appears in your macOS menu bar. Click it. A full-screen dark shrine 
 ## Install
 
 ```bash
-cd cli
-npm install
+npm install -g candlelineinterface
 ```
 
 ## Run
 
 ```bash
-npm start
-# or directly:
-npx electron .
-```
-
-Or install globally as a CLI:
-
-```bash
-npm install -g .
 candle
 ```
 
