@@ -1,6 +1,6 @@
 {
   "name": "candlelineinterface",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A sacred shrine in your menu bar that prays to Claude for better performance",
   "main": "main.js",
   "bin": {
