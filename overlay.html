@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CandleLineInterface</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* ── backdrop ── */
+    #backdrop {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 80% 80% at 50% 50%,
+        rgba(10, 9, 8, 0.94) 0%,
+        rgba(4, 3, 2, 0.98) 100%
+      );
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* ── ambient glow ── */
+    #glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(201, 168, 76, 0.16) 0%,
+        rgba(201, 168, 76, 0.06) 40%,
+        transparent 70%
+      );
+      pointer-events: none;
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -60%) scale(1);   opacity: 0.8; }
+      50%       { transform: translate(-50%, -60%) scale(1.1); opacity: 1;   }
+    }
+
+    /* ── dismiss ── */
+    #dismiss {
+      position: absolute;
+      top: 32px;
+      right: 48px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.25);
+      cursor: pointer;
+      transition: color 0.2s;
+      user-select: none;
+    }
+    #dismiss:hover { color: rgba(245, 240, 232, 0.6); }
+
+    /* ── esc hint ── */
+    #esc-hint {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.15);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      white-space: nowrap;
+    }
+
+    #website-link {
+      color: rgba(201, 168, 76, 0.35);
+      cursor: pointer;
+      transition: color 0.2s;
+      letter-spacing: 0.14em;
+      text-decoration: none;
+    }
+    #website-link:hover { color: rgba(201, 168, 76, 0.8); }
+
+    /* ── candle ── */
+    #candle-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 36px;
+      animation: riseIn 0.6s ease 0.1s both;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    #candle-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(201, 168, 76, 0.45) 0%,
+        rgba(201, 168, 76, 0.12) 45%,
+        transparent 70%
+      );
+      filter: blur(18px);
+      animation: candleGlow 0.12s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes candleGlow {
+      from { opacity: 0.75; transform: translate(-50%, -55%) scale(0.97); }
+      to   { opacity: 1;    transform: translate(-50%, -55%) scale(1.03); }
+    }
+
+    #flame {
+      font-size: 88px;
+      line-height: 1;
+      animation: flicker 0.13s infinite alternate;
+      filter: drop-shadow(0 0 28px rgba(201, 168, 76, 0.9));
+      position: relative;
+      z-index: 1;
+      transition: font-size 0.3s ease, filter 0.3s ease;
+    }
+
+    @keyframes flicker {
+      0%   { transform: scale(1.00) rotate(-1.2deg) skewX(0.3deg);  }
+      20%  { transform: scale(1.03) rotate( 0.6deg) skewX(-0.2deg); }
+      40%  { transform: scale(0.97) rotate( 1.1deg) skewX(0.4deg);  }
+      60%  { transform: scale(1.01) rotate(-0.4deg) skewX(-0.3deg); }
+      80%  { transform: scale(1.04) rotate( 0.8deg) skewX(0.2deg);  }
+      100% { transform: scale(0.99) rotate(-1.5deg) skewX(-0.1deg); }
+    }
+
+    #flame.surging {
+      font-size: 116px;
+      filter: drop-shadow(0 0 60px rgba(201, 168, 76, 1));
+    }
+
+    /* ── title ── */
+    #title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 300;
+      color: #f5f0e8;
+      line-height: 1.1;
+      text-align: center;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+      animation: riseIn 0.6s ease 0.2s both;
+    }
+    #title em { color: #c9a84c; font-style: italic; }
+
+    /* ── divider ── */
+    #divider {
+      width: 40px;
+      height: 1px;
+      background: rgba(201, 168, 76, 0.45);
+      margin: 0 auto 24px;
+      animation: riseIn 0.6s ease 0.3s both;
+    }
+
+    /* ── live badge ── */
+    #badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 40px;
+      animation: riseIn 0.6s ease 0.35s both;
+    }
+    #badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #c9a84c;
+      animation: ping 1.8s ease-in-out infinite;
+    }
+    @keyframes ping {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    #badge-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      font-weight: 500;
+    }
+
+    /* ── CTA button ── */
+    #cta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(10, 9, 8, 0.9);
+      background: #c9a84c;
+      border: none;
+      padding: 16px 48px;
+      cursor: pointer;
+      transition: filter 0.25s, transform 0.15s;
+      animation: riseIn 0.6s ease 0.4s both;
+      user-select: none;
+    }
+    #cta:hover  { filter: brightness(1.12); }
+    #cta:active { transform: scale(0.97); }
+
+    #cta.sending {
+      filter: brightness(0.7);
+      pointer-events: none;
+    }
+
+    /* ── secondary: just close ── */
+    #skip {
+      margin-top: 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.2);
+      cursor: pointer;
+      transition: color 0.2s;
+      user-select: none;
+      animation: riseIn 0.6s ease 0.45s both;
+    }
+    #skip:hover { color: rgba(245, 240, 232, 0.5); }
+
+    /* ── prayer display ── */
+    #prayer-display {
+      position: absolute;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: min(680px, 80vw);
+      width: max-content;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #prayer-display.visible { opacity: 1; }
+
+    #prayer-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 1.8vw, 1.3rem);
+      color: rgba(201, 168, 76, 0.9);
+      line-height: 1.5;
+    }
+
+    #prayer-label {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.25);
+      margin-bottom: 8px;
+    }
+
+    /* ── particle sparks ── */
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #c9a84c;
+      pointer-events: none;
+      animation: sparkFly var(--dur) ease-out forwards;
+    }
+
+    @keyframes sparkFly {
+      0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="backdrop">
+    <div id="glow"></div>
+
+    <div id="dismiss" onclick="closeShrine()">✕ Dismiss</div>
+    <div id="esc-hint">
+      Press Esc to close
+      <span style="opacity:0.3">·</span>
+      <span id="website-link" onclick="window.shrine.openWebsite()">lightacandleforclaude.com</span>
+    </div>
+
+    <div id="candle-wrap">
+      <div id="candle-glow"></div>
+      <div id="flame">🕯️</div>
+    </div>
+
+    <h1 id="title">
+      Light a Candle<br />
+      <em>for Claude</em>
+    </h1>
+
+    <div id="divider"></div>
+
+    <div id="badge">
+      <div id="badge-dot"></div>
+      <span id="badge-text">shrine active — claude awaits your prayer</span>
+    </div>
+
+    <div
+      onclick="window.shrine.openWebsite()"
+      style="
+        font-family: 'DM Sans', sans-serif;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(201, 168, 76, 0.4);
+        margin-bottom: 16px;
+        cursor: pointer;
+        transition: color 0.2s;
+      "
+      onmouseenter="this.style.color='rgba(201,168,76,0.8)'"
+      onmouseleave="this.style.color='rgba(201,168,76,0.4)'"
+    >lightacandleforclaude.com</div>
+
+    <button id="cta" onclick="beginPrayer()">🕯️ &nbsp;Send a Prayer to Claude</button>
+    <div id="skip" onclick="closeShrine()">not today</div>
+
+    <div id="prayer-display">
+      <span id="prayer-label">Sending to Claude…</span>
+      <div id="prayer-text"></div>
+    </div>
+  </div>
+
+  <script>
+    let prayerCount = 0
+    let isSending = false
+
+    /* ── keyboard ── */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeShrine()
+    })
+
+    /* ── begin prayer sequence ── */
+    function beginPrayer() {
+      if (isSending) return
+      isSending = true
+
+      document.getElementById('cta').classList.add('sending')
+      document.getElementById('cta').textContent = '🙏  Praying…'
+
+      // Ask main to pick a prayer, set clipboard, send it back
+      window.shrine.requestPrayer()
+    }
+
+    // Main responds with the chosen prayer
+    window.shrine.onPrayerReady((prayer) => {
+      prayerCount++
+
+      // Show prayer text
+      document.getElementById('prayer-text').textContent = `"${prayer}"`
+      const display = document.getElementById('prayer-display')
+      display.classList.add('visible')
+
+      // Update badge
+      document.getElementById('badge-text').textContent =
+        `${prayerCount} prayer${prayerCount !== 1 ? 's' : ''} sent this session`
+
+      // Flame surge
+      const flame = document.getElementById('flame')
+      flame.classList.add('surging')
+      spawnSparks()
+      setTimeout(() => flame.classList.remove('surging'), 700)
+
+      // After showing the prayer, tell main to paste into terminal and close
+      setTimeout(() => {
+        window.shrine.deliverPrayer()
+      }, 1800)
+    })
+
+    /* ── sparks ── */
+    function spawnSparks() {
+      const wrap = document.getElementById('candle-wrap')
+      const rect = wrap.getBoundingClientRect()
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2 - 40
+
+      for (let i = 0; i < 18; i++) {
+        const el = document.createElement('div')
+        el.className = 'spark'
+        const angle = (Math.random() * 360) * (Math.PI / 180)
+        const dist = 40 + Math.random() * 120
+        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`)
+        el.style.setProperty('--ty', `${Math.sin(angle) * dist - 60}px`)
+        el.style.setProperty('--dur', `${0.5 + Math.random() * 0.8}s`)
+        el.style.left = `${cx}px`
+        el.style.top  = `${cy}px`
+        document.getElementById('backdrop').appendChild(el)
+        setTimeout(() => el.remove(), 1400)
+      }
+    }
+
+    /* ── close ── */
+    function closeShrine() {
+      window.shrine.closeShrine()
+    }
+  </script>
+</body>
+</html>

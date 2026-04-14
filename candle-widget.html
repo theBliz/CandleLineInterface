@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      -webkit-user-select: none;
+      cursor: pointer;
+    }
+
+    #root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ── ambient glow ── */
+    #glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(201, 168, 76, 0.5)  0%,
+        rgba(201, 168, 76, 0.15) 45%,
+        transparent 70%
+      );
+      filter: blur(14px);
+      pointer-events: none;
+      animation: breathe 2.8s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.7; transform: translate(-50%, -52%) scale(1);    }
+      50%       { opacity: 1;   transform: translate(-50%, -52%) scale(1.18); }
+    }
+
+    /* ── candle ── */
+    #candle {
+      font-size: 54px;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 14px rgba(201, 168, 76, 0.95));
+      animation: flicker 2.4s ease-in-out infinite alternate;
+      transition: font-size 0.25s ease, filter 0.25s ease;
+    }
+
+    @keyframes flicker {
+      0%   { transform: scale(1.00); filter: drop-shadow(0 0 12px rgba(201, 168, 76, 0.8)); }
+      40%  { transform: scale(1.02); filter: drop-shadow(0 0 18px rgba(201, 168, 76, 1.0)); }
+      70%  { transform: scale(0.99); filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.7)); }
+      100% { transform: scale(1.01); filter: drop-shadow(0 0 16px rgba(201, 168, 76, 0.9)); }
+    }
+
+    #candle.surge {
+      font-size: 74px;
+      filter: drop-shadow(0 0 40px rgba(201, 168, 76, 1));
+    }
+
+    /* ── hover ring ── */
+    #ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0);
+      transition: border-color 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+
+    #root:hover #ring {
+      border-color: rgba(201, 168, 76, 0.35);
+      transform: translate(-50%, -50%) scale(1.12);
+    }
+
+    /* ── prayer toast ── */
+    #toast {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      width: 220px;
+      background: rgba(10, 9, 8, 0.92);
+      border: 1px solid rgba(201, 168, 76, 0.35);
+      border-radius: 3px;
+      padding: 9px 12px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-size: 10.5px;
+      color: rgba(201, 168, 76, 0.9);
+      line-height: 1.55;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    #toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── spark particles ── */
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #c9a84c;
+      pointer-events: none;
+      animation: sparkFly var(--dur) ease-out forwards;
+    }
+
+    @keyframes sparkFly {
+      0%   { opacity: 1; transform: translate(0, 0) scale(1.2); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="glow"></div>
+    <div id="ring"></div>
+    <div id="candle">🕯️</div>
+    <div id="toast"></div>
+  </div>
+
+  <script>
+    const candle = document.getElementById('candle')
+    const toast  = document.getElementById('toast')
+    const root   = document.getElementById('root')
+
+    let mouseDownPos = null
+    let isDragging   = false
+    let toastTimer   = null
+
+    /* ── drag vs click ── */
+    document.addEventListener('mousedown', (e) => {
+      mouseDownPos = { x: e.screenX, y: e.screenY }
+      isDragging   = false
+    })
+
+    document.addEventListener('mousemove', (e) => {
+      if (!mouseDownPos) return
+      const dx = Math.abs(e.screenX - mouseDownPos.x)
+      const dy = Math.abs(e.screenY - mouseDownPos.y)
+      if (dx > 8 || dy > 8) {
+        if (!isDragging) {
+          // Only register drag once we've confirmed real movement
+          isDragging = true
+          window.widget.dragStart(mouseDownPos.x, mouseDownPos.y)
+        }
+        window.widget.dragMove(e.screenX, e.screenY)
+      }
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) sendPrayer()
+      mouseDownPos = null
+      isDragging   = false
+      window.widget.dragEnd()
+    })
+
+    /* ── send prayer ── */
+    function sendPrayer() {
+      window.widget.sendPrayer()
+    }
+
+    /* ── receive prayer confirmation ── */
+    window.widget.onPrayerSent((prayer) => {
+      // Surge flame
+      candle.classList.add('surge')
+      spawnSparks()
+      setTimeout(() => candle.classList.remove('surge'), 600)
+
+      // Show toast
+      clearTimeout(toastTimer)
+      toast.textContent = `"${prayer}"`
+      toast.classList.add('visible')
+      toastTimer = setTimeout(() => toast.classList.remove('visible'), 3000)
+    })
+
+    /* ── sparks ── */
+    function spawnSparks() {
+      const rect = candle.getBoundingClientRect()
+      const cx = rect.left + rect.width  / 2
+      const cy = rect.top  + rect.height / 2 - 10
+
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement('div')
+        el.className = 'spark'
+        const angle = (Math.random() * 360) * (Math.PI / 180)
+        const dist  = 25 + Math.random() * 55
+        el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`)
+        el.style.setProperty('--ty', `${Math.sin(angle) * dist - 40}px`)
+        el.style.setProperty('--dur', `${0.4 + Math.random() * 0.6}s`)
+        el.style.left = `${cx}px`
+        el.style.top  = `${cy}px`
+        root.appendChild(el)
+        setTimeout(() => el.remove(), 1100)
+      }
+    }
+  </script>
+</body>
+</html>

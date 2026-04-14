@@ -1,0 +1,41 @@
+{
+  "name": "candlelineinterface",
+  "version": "1.0.0",
+  "description": "A sacred shrine in your menu bar that prays to Claude for better performance",
+  "main": "main.js",
+  "bin": {
+    "candle": "./bin/candle.js"
+  },
+  "files": [
+    "main.js",
+    "preload.js",
+    "widget-preload.js",
+    "overlay.html",
+    "candle-widget.html",
+    "bin/"
+  ],
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^33.0.0"
+  },
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai",
+    "shrine",
+    "candle",
+    "prayer",
+    "tray",
+    "menu-bar"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vidrepar/isclaudedumbornot.com"
+  }
+}
