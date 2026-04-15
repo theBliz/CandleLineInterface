@@ -106,6 +106,15 @@
     }
     #website-link:hover { color: rgba(201, 168, 76, 0.8); }
 
+    #github-link {
+      color: rgba(245, 240, 232, 0.2);
+      cursor: pointer;
+      transition: color 0.2s;
+      letter-spacing: 0.14em;
+      text-decoration: none;
+    }
+    #github-link:hover { color: rgba(245, 240, 232, 0.55); }
+
     /* ── candle ── */
     #candle-wrap {
       position: relative;
@@ -318,6 +327,8 @@
       Press Esc to close
       <span style="opacity:0.3">·</span>
       <span id="website-link" onclick="window.shrine.openWebsite()">lightacandleforclaude.com</span>
+      <span style="opacity:0.3">·</span>
+      <span id="github-link" onclick="window.shrine.openGithub()">⭐ star on github</span>
     </div>
 
     <div id="candle-wrap">

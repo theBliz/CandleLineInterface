@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('shrine', {
   deliverPrayer: () => ipcRenderer.send('deliver-prayer'),
   closeShrine: () => ipcRenderer.send('close-shrine'),
   openWebsite: () => ipcRenderer.send('open-website'),
+  openGithub:  () => ipcRenderer.send('open-github'),
 })

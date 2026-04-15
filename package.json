@@ -1,6 +1,6 @@
 {
   "name": "candlelineinterface",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A sacred shrine in your menu bar that prays to Claude for better performance",
   "main": "main.js",
   "bin": {
@@ -10,15 +10,17 @@
     "main.js",
     "preload.js",
     "widget-preload.js",
+    "star-preload.js",
     "overlay.html",
     "candle-widget.html",
+    "star-widget.html",
     "bin/"
   ],
   "scripts": {
     "start": "electron ."
   },
   "dependencies": {
-    "electron": "^33.0.0"
+    "electron": "^41.2.0"
   },
   "keywords": [
     "claude",

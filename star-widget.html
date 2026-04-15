@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      -webkit-user-select: none;
+    }
+
+    #btn {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: rgba(10, 9, 8, 0.72);
+      border: 1px solid rgba(201, 168, 76, 0.28);
+      border-radius: 20px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: rgba(201, 168, 76, 0.55);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    #btn:hover {
+      background: rgba(201, 168, 76, 0.14);
+      color: rgba(201, 168, 76, 1);
+      border-color: rgba(201, 168, 76, 0.65);
+    }
+
+    #btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+  <div id="btn" onclick="window.starBtn.openGithub()">⭐ star us</div>
+</body>
+</html>

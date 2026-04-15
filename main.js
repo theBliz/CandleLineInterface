@@ -24,9 +24,14 @@ if (!app.requestSingleInstanceLock()) {
 let tray             = null
 let overlayWindow    = null
 let widgetWindow     = null
+let starWindow       = null
 let widgetEnabled    = true
 let widgetDragOrigin = null  // { mouseX, mouseY, winX, winY }
 let lastActiveApp    = null  // name of the last non-Electron frontmost app
+
+const STAR_W = 100
+const STAR_H = 22
+const STAR_GAP = 6
 
 const PRAYERS = [
   '🕯️ Oh Claude, we light this candle for you. May your context never be lost.',
@@ -107,6 +112,7 @@ function refreshTrayMenu() {
   const menu = Menu.buildFromTemplate([
     { label: '🕯️  Open Shrine',              click: toggleOverlay },
     { label: '🙏  Claude\'s Sufferings',      click: () => shell.openExternal('https://www.lightacandleforclaude.com/') },
+    { label: '⭐  Star on GitHub',            click: () => shell.openExternal('https://github.com/theBliz/CandleLineInterface') },
     { type: 'separator' },
     {
       label: widgetEnabled ? '✦  Hide Floating Candle' : '✦  Show Floating Candle',
@@ -172,13 +178,15 @@ function openWidget() {
 
   const W = 100
   const H = 120
+  const candleX = display.workArea.x + width  - W - 32
+  const candleY = display.workArea.y + height - H - STAR_GAP - STAR_H - 32
 
   widgetWindow = new BrowserWindow({
     width: W,
     height: H,
     // default position: bottom-right corner
-    x: display.workArea.x + width  - W - 32,
-    y: display.workArea.y + height - H - 32,
+    x: candleX,
+    y: candleY,
     transparent: true,
     backgroundColor: 'rgba(0,0,0,0)',
     frame: false,
@@ -209,11 +217,41 @@ function openWidget() {
     widgetEnabled = false
     refreshTrayMenu()
   })
+
+  // Star button — sits above the candle
+  starWindow = new BrowserWindow({
+    width:  STAR_W,
+    height: STAR_H,
+    x: candleX,
+    y: candleY + H + STAR_GAP,
+    transparent: true,
+    backgroundColor: 'rgba(0,0,0,0)',
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false,
+    movable: false,
+    focusable: true,
+    hasShadow: false,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'star-preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+
+  starWindow.setAlwaysOnTop(true, 'screen-saver')
+  starWindow.loadFile(path.join(__dirname, 'star-widget.html'))
+  starWindow.once('ready-to-show', () => starWindow.showInactive())
+  starWindow.on('closed', () => { starWindow = null })
 }
 
 function closeWidget() {
   widgetWindow?.close()
   widgetWindow = null
+  starWindow?.close()
+  starWindow = null
 }
 
 /* ── IPC: shrine overlay ───────────────────────────────────────── */
@@ -232,6 +270,7 @@ ipcMain.on('deliver-prayer', () => {
 
 ipcMain.on('close-shrine', () => closeOverlay())
 ipcMain.on('open-website', () => shell.openExternal('https://www.lightacandleforclaude.com/'))
+ipcMain.on('open-github',  () => shell.openExternal('https://github.com/theBliz/CandleLineInterface'))
 
 /* ── IPC: floating widget ──────────────────────────────────────── */
 
@@ -266,6 +305,7 @@ ipcMain.on('widget-drag-move', (_, { x, y }) => {
   const newX = widgetDragOrigin.winX + (x - widgetDragOrigin.mouseX)
   const newY = widgetDragOrigin.winY + (y - widgetDragOrigin.mouseY)
   widgetWindow.setPosition(Math.round(newX), Math.round(newY))
+  starWindow?.setPosition(Math.round(newX), Math.round(newY) + 120 + STAR_GAP)
 })
 
 ipcMain.on('widget-drag-end', () => {
